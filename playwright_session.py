@@ -51,16 +51,21 @@ class PlaywrightSession:
         self.context.close()
         self.browser.close()
 
-    def scroll_to_last_element(self, selector: str, child_selector: str = "div") -> None:
+    def scroll_to_last_element(self, selector: str,
+                               child_selector: str = "div",
+                               elements_load_time_ms: int = 1_000) -> None:
         """Scroll to the last child element in given selector."""
 
         while True:
             elements = self.page.locator(selector + ">" + child_selector)
-            elements.element_handles()[-1].scroll_into_view_if_needed()
-            elements = self.page.locator(selector)
             items_on_page = len(elements.element_handles())
-            # self.page.wait_for_timeout(2_000)  # give some time for new items to load
+
+            elements.element_handles()[-1].scroll_into_view_if_needed()
+            self.page.wait_for_timeout(elements_load_time_ms)  # give some time for new items to load
+
+            elements = self.page.locator(selector + ">" + child_selector)
             items_on_page_after_scroll = len(elements.element_handles())
+
             if items_on_page_after_scroll > items_on_page:
                 continue  # more items loaded - keep scrolling
             else:

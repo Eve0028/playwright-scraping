@@ -46,14 +46,14 @@ if __name__ == "__main__":
                                 environ.get('PROXY'))
 
     with sync_playwright() as playwright:
-        wait_selector = "div[id=quotesPlaceholder]"
+        wait_selector = environ['PARENT_SELECTOR']
         session.setup_playwright(playwright, wait_selector)
         try:
             while True:
-                session.scroll_to_last_element("#quotesPlaceholder", "div")
+                session.scroll_to_last_element(environ['PARENT_SELECTOR'], environ['CHILD_SELECTOR'])
                 all_quotes += get_quotes(BeautifulSoup(session.page.content(), 'html.parser'))
                 try:
-                    session.click_button(".next>a")
+                    session.click_button(environ['NEXT_PAGE_BUTTON_SELECTOR'])
                 except PlaywrightTimeoutError:
                     break
                 session.wait_for_content(wait_selector)
